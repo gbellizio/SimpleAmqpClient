@@ -46,4 +46,82 @@
 #define SAC_DEPRECATED(msg)
 #endif
 
+#include <vector>
+#include <string>
+
+namespace AmqpClient {
+namespace Detail {
+
+/**
+ * @brief c++11 replacement for boost::noncopyable
+ */
+class noncopyable {
+ public:
+  noncopyable() = default;
+  noncopyable(const noncopyable&) = delete;
+  const noncopyable& operator=(const noncopyable&) = delete;
+};
+
+/**
+ * @brief Removes leading spaces from a string
+ * @param str a string
+ */
+inline void ltrim(std::string &str) {
+  str.erase(str.begin(), str.begin() + str.find_first_not_of(' '));
+}
+
+/**
+ * @brief Removes trailing spaces from a string
+ * @param str a string
+ */
+inline void rtrim(std::string &str) {
+  auto it = str.rbegin();
+  auto end = str.rend();
+
+  while (it != end and *it == ' ') {
+    ++it;
+  }
+  str.erase(it.base(), str.end());
+}
+
+/**
+ * @brief Removes leading and trailing spaces from a string
+ * @param str a string
+ */
+inline void trim(std::string &str) {
+  rtrim(str);
+  ltrim(str);
+}
+
+/**
+ * @brief Simple boost::split replacement
+ * @param tokens a container to fill with tokens
+ * @param text a text
+ * @param separators a collection of separators to tokenize @c str
+ */
+inline void split(std::vector<std::string> &tokens, const std::string &text,
+                  const std::string &separators) {
+  std::string token;
+
+  for (auto c : text) {
+    if (separators.find(c) != std::string::npos) {
+      trim(token);
+      if (!token.empty()) {
+        tokens.push_back(token);
+        token.clear();
+      }
+    } else {
+      token += c;
+    }
+  }
+
+  trim(token);
+
+  if (!token.empty()) {
+    if (!token.empty()) tokens.push_back(token);
+  }
+}
+
+}
+}
 #endif  // SIMPLEAMQPCLIENT_UTIL_H

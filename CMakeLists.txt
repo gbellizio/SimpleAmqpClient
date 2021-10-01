@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.5)
 
 project(SimpleAmqpClient LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 98)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -21,7 +21,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # 4. If any interfaces have been removed since the last public release, then set age to 0.
 
 set(SAC_SOVERSION_CURRENT   7)
-set(SAC_SOVERSION_REVISION  1)
+set(SAC_SOVERSION_REVISION  2)
 set(SAC_SOVERSION_AGE       0)
 
 math(EXPR SAC_SOVERSION_MAJOR "${SAC_SOVERSION_CURRENT} - ${SAC_SOVERSION_AGE}")
@@ -40,17 +40,6 @@ string(REGEX MATCH "[0-9]+" _API_VERSION_MINOR ${_API_VERSION_MINOR})
 string(REGEX MATCH "[0-9]+" _API_VERSION_PATCH ${_API_VERSION_PATCH})
 
 set(SAC_APIVERSION ${_API_VERSION_MAJOR}.${_API_VERSION_MINOR}.${_API_VERSION_PATCH})
-
-option(Boost_Dynamic_Linking_ENABLED "Enable boost dynamic linking" OFF)
-
-if(Boost_Dynamic_Linking_ENABLED)
-  set(Boost_USE_STATIC_LIBS OFF)
-  set(Boost_USE_STATIC_RUNTIME OFF)
-endif()
-
-find_package(Boost 1.47.0 COMPONENTS chrono system REQUIRED)
-include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
-link_directories(${Boost_LIBRARY_DIRS})
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Modules)
 find_package(Rabbitmqc REQUIRED)
@@ -135,7 +124,7 @@ set(SAC_LIB_SRCS
 
 
 add_library(SimpleAmqpClient ${SAC_LIB_SRCS})
-target_link_libraries(SimpleAmqpClient ${Rabbitmqc_LIBRARY} ${SOCKET_LIBRARY} ${Boost_LIBRARIES} $<$<BOOL:${Boost_Dynamic_Linking_ENABLED}>:Boost::dynamic_linking>)
+target_link_libraries(SimpleAmqpClient ${Rabbitmqc_LIBRARY} ${SOCKET_LIBRARY})
 
 if (WIN32)
   set_target_properties(SimpleAmqpClient PROPERTIES VERSION ${SAC_VERSION} OUTPUT_NAME SimpleAmqpClient.${SAC_SOVERSION})

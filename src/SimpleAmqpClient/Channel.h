@@ -28,15 +28,10 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#include <boost/cstdint.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/optional.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/utility.hpp>
-#include <boost/utility/string_ref.hpp>
-#include <boost/variant.hpp>
+#include <cstdint>
+#include <optional>
 #include <string>
+#include <variant>
 #include <vector>
 
 #include "SimpleAmqpClient/BasicMessage.h"
@@ -59,10 +54,10 @@ namespace AmqpClient {
  *
  * Represents a logical AMQP channel multiplexed over a connection
  */
-class SIMPLEAMQPCLIENT_EXPORT Channel : boost::noncopyable {
+class SIMPLEAMQPCLIENT_EXPORT Channel : Detail::noncopyable {
  public:
   /// a `shared_ptr` to Channel
-  typedef boost::shared_ptr<Channel> ptr_t;
+  typedef std::shared_ptr<Channel> ptr_t;
 
   static const std::string
       EXCHANGE_TYPE_DIRECT;  ///< `"direct"` string constant
@@ -109,9 +104,9 @@ class SIMPLEAMQPCLIENT_EXPORT Channel : boost::noncopyable {
     int port;           ///< Port to connect to, default is 5672.
     int frame_max;      ///< Max frame size in bytes. Default 128KB.
     /// One of BasicAuth or ExternalSaslAuth is required.
-    boost::variant<BasicAuth, ExternalSaslAuth> auth;
+    std::variant<std::monostate, BasicAuth, ExternalSaslAuth> auth;
     /// Connect using TLS/SSL when set, otherwise use an unencrypted channel.
-    boost::optional<TLSParams> tls_params;
+    std::optional<TLSParams> tls_params;
 
     /**
      * Create an OpenOpts struct from a URI.
@@ -351,7 +346,7 @@ class SIMPLEAMQPCLIENT_EXPORT Channel : boost::noncopyable {
    * @param exchange_name the name of the exchange to check for.
    * @returns true if the exchange exists on the broker, false otherwise.
    */
-  bool CheckExchangeExists(boost::string_ref exchange_name);
+  bool CheckExchangeExists(std::string_view exchange_name);
 
   /**
    * Declares an exchange
@@ -454,7 +449,7 @@ class SIMPLEAMQPCLIENT_EXPORT Channel : boost::noncopyable {
    * @param queue_name the name of the exchange to check for.
    * @returns true if the exchange exists on the broker, false otherwise.
    */
-  bool CheckQueueExists(boost::string_ref queue_name);
+  bool CheckQueueExists(std::string_view queue_name);
 
   /**
    * Declare a queue
@@ -527,8 +522,8 @@ class SIMPLEAMQPCLIENT_EXPORT Channel : boost::noncopyable {
    * broker is asked to create a unique queue by not providing a queue name.
    */
   std::string DeclareQueueWithCounts(const std::string &queue_name,
-                                     boost::uint32_t &message_count,
-                                     boost::uint32_t &consumer_count,
+                                     std::uint32_t &message_count,
+                                     std::uint32_t &consumer_count,
                                      bool passive = false, bool durable = false,
                                      bool exclusive = true,
                                      bool auto_delete = true);
@@ -558,8 +553,8 @@ class SIMPLEAMQPCLIENT_EXPORT Channel : boost::noncopyable {
    * broker is asked to create a unique queue by not providing a queue name.
    */
   std::string DeclareQueueWithCounts(const std::string &queue_name,
-                                     boost::uint32_t &message_count,
-                                     boost::uint32_t &consumer_count,
+                                     std::uint32_t &message_count,
+                                     std::uint32_t &consumer_count,
                                      bool passive, bool durable, bool exclusive,
                                      bool auto_delete, const Table &arguments);
 
@@ -772,7 +767,7 @@ class SIMPLEAMQPCLIENT_EXPORT Channel : boost::noncopyable {
                            const std::string &consumer_tag = "",
                            bool no_local = true, bool no_ack = true,
                            bool exclusive = true,
-                           boost::uint16_t message_prefetch_count = 1);
+                           std::uint16_t message_prefetch_count = 1);
 
   /**
    * Starts consuming Basic messages on a queue
@@ -800,7 +795,7 @@ class SIMPLEAMQPCLIENT_EXPORT Channel : boost::noncopyable {
   std::string BasicConsume(const std::string &queue,
                            const std::string &consumer_tag, bool no_local,
                            bool no_ack, bool exclusive,
-                           boost::uint16_t message_prefetch_count,
+                           std::uint16_t message_prefetch_count,
                            const Table &arguments);
 
   /**
@@ -816,7 +811,7 @@ class SIMPLEAMQPCLIENT_EXPORT Channel : boost::noncopyable {
    * broker will deliver. A value of 0 means no limit.
    */
   void BasicQos(const std::string &consumer_tag,
-                boost::uint16_t message_prefetch_count);
+                std::uint16_t message_prefetch_count);
 
   /**
    * Cancels a previously created Consumer
@@ -934,7 +929,7 @@ class SIMPLEAMQPCLIENT_EXPORT Channel : boost::noncopyable {
                                         bool sasl_external);
 
   /// PIMPL idiom
-  boost::scoped_ptr<ChannelImpl> m_impl;
+  std::unique_ptr<ChannelImpl> m_impl;
 };
 
 }  // namespace AmqpClient
