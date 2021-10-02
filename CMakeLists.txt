@@ -41,9 +41,7 @@ string(REGEX MATCH "[0-9]+" _API_VERSION_PATCH ${_API_VERSION_PATCH})
 
 set(SAC_APIVERSION ${_API_VERSION_MAJOR}.${_API_VERSION_MINOR}.${_API_VERSION_PATCH})
 
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Modules)
-find_package(Rabbitmqc REQUIRED)
-INCLUDE_DIRECTORIES(SYSTEM ${Rabbitmqc_INCLUDE_DIRS})
+find_package(rabbitmq-c REQUIRED)
 
 option(ENABLE_SSL_SUPPORT "Enable SSL support." ${Rabbitmqc_SSL_ENABLED})
 
@@ -124,7 +122,7 @@ set(SAC_LIB_SRCS
 
 
 add_library(SimpleAmqpClient ${SAC_LIB_SRCS})
-target_link_libraries(SimpleAmqpClient ${Rabbitmqc_LIBRARY} ${SOCKET_LIBRARY})
+target_link_libraries(SimpleAmqpClient rabbitmq::rabbitmq-static ${SOCKET_LIBRARY})
 
 if (WIN32)
   set_target_properties(SimpleAmqpClient PROPERTIES VERSION ${SAC_VERSION} OUTPUT_NAME SimpleAmqpClient.${SAC_SOVERSION})
@@ -160,6 +158,13 @@ if (ENABLE_TESTING)
     add_subdirectory(testing)
 endif (ENABLE_TESTING)
 
+# Some examples
+
+option(BUILD_EXAMPLES "Build Examples" ON)
+
+if (BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif ()
 
 # Documentation generation
 find_package(Doxygen COMPONENTS dot)
