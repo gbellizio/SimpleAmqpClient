@@ -191,14 +191,14 @@ Channel::ptr_t Channel::Open(const OpenOpts &opts) {
   }
   if (!opts.tls_params.has_value()) {
     switch (opts.auth.index()) {
-      case 0: {
+      case 1: {
         const OpenOpts::BasicAuth &auth =
             std::get<OpenOpts::BasicAuth>(opts.auth);
         return std::make_shared<Channel>(
             OpenChannel(opts.host, opts.port, auth.username, auth.password,
                         opts.vhost, opts.frame_max, false));
       }
-      case 1: {
+      case 2: {
         const OpenOpts::ExternalSaslAuth &auth =
             std::get<OpenOpts::ExternalSaslAuth>(opts.auth);
         return std::make_shared<Channel>(
@@ -210,14 +210,14 @@ Channel::ptr_t Channel::Open(const OpenOpts &opts) {
     }
   }
   switch (opts.auth.index()) {
-    case 0: {
+    case 1: {
       const OpenOpts::BasicAuth &auth =
           std::get<OpenOpts::BasicAuth>(opts.auth);
       return std::make_shared<Channel>(OpenSecureChannel(
           opts.host, opts.port, auth.username, auth.password, opts.vhost,
           opts.frame_max, opts.tls_params.value(), false));
     }
-    case 1: {
+    case 2: {
       const OpenOpts::ExternalSaslAuth &auth =
           std::get<OpenOpts::ExternalSaslAuth>(opts.auth);
       return std::make_shared<Channel>(
@@ -791,7 +791,7 @@ void Channel::BasicReject(const Envelope::ptr_t &message, bool requeue,
 void Channel::BasicReject(const Envelope::DeliveryInfo &info, bool requeue,
                           bool multiple) {
   m_impl->CheckIsConnected();
-  // Delivery tag is local to the channel, so its important to use
+  // Delivery tag is local to the channel, so it's important to use
   // that channel, sadly this can cause the channel to throw an exception
   // which will show up as an unrelated exception in a different method
   // that actually waits for a response from the broker
@@ -813,7 +813,7 @@ void Channel::BasicPublish(const std::string &exchange_name,
                            const std::string &routing_key,
                            const BasicMessage::ptr_t message, bool mandatory,
                            bool immediate) {
-  m_impl->CheckIsConnected();
+  //m_impl->CheckIsConnected();
   amqp_channel_t channel = m_impl->GetChannel();
 
   Detail::amqp_pool_ptr_t pool;
@@ -826,15 +826,15 @@ void Channel::BasicPublish(const std::string &exchange_name,
 
   // If we've done things correctly we can get one of 4 things back from the
   // broker
-  // - basic.ack - our channel is in confirm mode, messsage was 'dealt with' by
+  // - basic.ack - our channel is in confirm mode, message was 'dealt with' by
   // the broker
   // - basic.nack - our channel is in confirm mode, queue has max-length set and
-  // is full, queue overflow stratege is reject-publish
-  // - basic.return then basic.ack - the message wasn't delievered, but was
+  // is full, queue overflow strategy is reject-publish
+  // - basic.return then basic.ack - the message wasn't delivered, but was
   // dealt with
-  // - channel.close - probably tried to publish to a non-existant exchange, in
+  // - channel.close - probably tried to publish to a non-existent exchange, in
   // any case error!
-  // - connection.clsoe - something really bad happened
+  // - connection.close - something really bad happened
   const std::array<std::uint32_t, 3> PUBLISH_ACK = {
       {AMQP_BASIC_ACK_METHOD, AMQP_BASIC_RETURN_METHOD,
        AMQP_BASIC_NACK_METHOD}};
