@@ -36,7 +36,6 @@
  * ***** END LICENSE BLOCK *****
  */
 
-#include <SimpleAmqpClient/Bytes.h>
 #include <SimpleAmqpClient/SimpleAmqpClient.h>
 
 #include <chrono>
