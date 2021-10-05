@@ -41,13 +41,40 @@ string(REGEX MATCH "[0-9]+" _API_VERSION_PATCH ${_API_VERSION_PATCH})
 
 set(SAC_APIVERSION ${_API_VERSION_MAJOR}.${_API_VERSION_MINOR}.${_API_VERSION_PATCH})
 
-find_package(rabbitmq-c REQUIRED)
+option(SAC_USE_FETCH_CONTENT "Use FetchContent to download and install rabbitmq-c library" ON)
+if (SAC_USE_FETCH_CONTENT)
+  include(FetchContent)
+
+  FetchContent_Declare(
+          rabbitmq-c
+          GIT_REPOSITORY https://github.com/alanxz/rabbitmq-c.git
+          GIT_TAG origin/master
+          GIT_SHALLOW true
+  )
+  FetchContent_MakeAvailable(rabbitmq-c)
+else ()
+  find_package(rabbitmq-c REQUIRED)
+endif ()
+
+# Determines if OpenSSL support was enabled in rabbitmq-c library
+if (BUILD_SHARED_LIBS)
+  get_target_property(rabbitmq_INTERFACE_LIBS rabbitmq::rabbitmq INTERFACE_LINK_LIBRARIES)
+else()
+  get_target_property(rabbitmq_INTERFACE_LIBS rabbitmq::rabbitmq-static INTERFACE_LINK_LIBRARIES)
+endif ()
+
+string(FIND "${rabbitmq_INTERFACE_LIBS}" "OpenSSL" rabbitmq_OPENSSL_POS)
+if (rabbitmq_OPENSSL_POS GREATER_EQUAL 0)
+    message(STATUS "rabbitmq-c compiled with OpenSSL support enabled")
+    set(Rabbitmqc_SSL_ENABLED "ON")
+    find_package(OpenSSL 1.1.1 REQUIRED)
+endif ()
 
 option(ENABLE_SSL_SUPPORT "Enable SSL support." ${Rabbitmqc_SSL_ENABLED})
 
 if (ENABLE_SSL_SUPPORT)
   add_definitions(-DSAC_SSL_SUPPORT_ENABLED)
-endif()
+endif ()
 
 if (CMAKE_GENERATOR MATCHES ".*(Make|Ninja).*"
     AND NOT CMAKE_BUILD_TYPE)
@@ -122,7 +149,13 @@ set(SAC_LIB_SRCS
 
 
 add_library(SimpleAmqpClient ${SAC_LIB_SRCS})
-target_link_libraries(SimpleAmqpClient rabbitmq::rabbitmq-static ${SOCKET_LIBRARY})
+target_link_libraries(SimpleAmqpClient ${SOCKET_LIBRARY})
+
+if (BUILD_SHARED_LIBS)
+  target_link_libraries(SimpleAmqpClient rabbitmq::rabbitmq)
+else()
+  target_link_libraries(SimpleAmqpClient rabbitmq::rabbitmq-static)
+endif()
 
 if (WIN32)
   set_target_properties(SimpleAmqpClient PROPERTIES VERSION ${SAC_VERSION} OUTPUT_NAME SimpleAmqpClient.${SAC_SOVERSION})
@@ -160,9 +193,9 @@ endif (ENABLE_TESTING)
 
 # Some examples
 
-option(BUILD_EXAMPLES "Build Examples" ON)
+option(SAC_BUILD_EXAMPLES "Build Examples" ON)
 
-if (BUILD_EXAMPLES)
+if (SAC_BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif ()
 
