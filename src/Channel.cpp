@@ -813,7 +813,7 @@ void Channel::BasicPublish(const std::string &exchange_name,
                            const std::string &routing_key,
                            const BasicMessage::ptr_t message, bool mandatory,
                            bool immediate) {
-  //m_impl->CheckIsConnected();
+  m_impl->CheckIsConnected();
   amqp_channel_t channel = m_impl->GetChannel();
 
   Detail::amqp_pool_ptr_t pool;
