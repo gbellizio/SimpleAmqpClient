@@ -150,6 +150,7 @@ set(SAC_LIB_SRCS
 
 add_library(simple_amqp_client ${SAC_LIB_SRCS})
 target_link_libraries(simple_amqp_client ${SOCKET_LIBRARY})
+target_include_directories(simple_amqp_client PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 if (BUILD_SHARED_LIBS)
   target_link_libraries(simple_amqp_client rabbitmq::rabbitmq)
