@@ -5,7 +5,7 @@
 # and then issuing `yum install cmake3` on the command line.
 cmake_minimum_required(VERSION 3.5)
 
-project(SimpleAmqpClient LANGUAGES CXX)
+project(simple_amqp_client LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -148,19 +148,19 @@ set(SAC_LIB_SRCS
     )
 
 
-add_library(SimpleAmqpClient ${SAC_LIB_SRCS})
-target_link_libraries(SimpleAmqpClient ${SOCKET_LIBRARY})
+add_library(simple_amqp_client ${SAC_LIB_SRCS})
+target_link_libraries(simple_amqp_client ${SOCKET_LIBRARY})
 
 if (BUILD_SHARED_LIBS)
-  target_link_libraries(SimpleAmqpClient rabbitmq::rabbitmq)
+  target_link_libraries(simple_amqp_client rabbitmq::rabbitmq)
 else()
-  target_link_libraries(SimpleAmqpClient rabbitmq::rabbitmq-static)
+  target_link_libraries(simple_amqp_client rabbitmq::rabbitmq-static)
 endif()
 
 if (WIN32)
-  set_target_properties(SimpleAmqpClient PROPERTIES VERSION ${SAC_VERSION} OUTPUT_NAME SimpleAmqpClient.${SAC_SOVERSION})
+  set_target_properties(simple_amqp_client PROPERTIES VERSION ${SAC_VERSION} OUTPUT_NAME simple_amqp_client.${SAC_SOVERSION})
 else ()
-  set_target_properties(SimpleAmqpClient PROPERTIES VERSION ${SAC_VERSION} SOVERSION ${SAC_SOVERSION})
+  set_target_properties(simple_amqp_client PROPERTIES VERSION ${SAC_VERSION} SOVERSION ${SAC_SOVERSION})
 endif ()
 
 # Some smoke tests:
@@ -213,7 +213,7 @@ if (BUILD_API_DOCS)
     COMMAND ${DOXYGEN_EXECUTABLE}
     VERBATIM
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs
-    DEPENDS SimpleAmqpClient
+    DEPENDS simple_amqp_client
     COMMENT "Generating API documentation"
     SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
     )
@@ -221,14 +221,14 @@ endif ()
 
 include(GNUInstallDirs)
 
-install(TARGETS SimpleAmqpClient
+install(TARGETS simple_amqp_client
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     )
 
 install(FILES
-    src/SimpleAmqpClient/AmqpException.h
+    src/simple_amqp_client/AmqpException.h
     src/SimpleAmqpClient/AmqpLibraryException.h
     src/SimpleAmqpClient/AmqpResponseLibraryException.h
     src/SimpleAmqpClient/BadUriException.h
